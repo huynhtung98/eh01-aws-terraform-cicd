@@ -4,7 +4,7 @@ resource "aws_key_pair" "ehkey_pair_threetier" {
   public_key = file("${path.module}/keypair/ehkey_pair.pub")
 
   lifecycle {
-    ignore_changes  = [public_key]
+    ignore_changes = [public_key]
   }
 }
 

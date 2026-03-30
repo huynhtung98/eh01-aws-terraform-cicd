@@ -11,7 +11,7 @@ resource "aws_security_group" "eh01-sg-izsub-basionhost" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }    
+  }
 
   egress {
     from_port   = 22
@@ -28,19 +28,19 @@ resource "aws_security_group" "eh01-sg-izsub-basionhost" {
 
 # Create Bastion Host instance
 resource "aws_instance" "eh01-ec2-izmgmt-bastionhost" {
-    ami                         = var.ami_id
-    associate_public_ip_address = true
-    instance_type               = var.instace_type
-    key_name                    = aws_key_pair.ehkey_pair_threetier.key_name
-    security_groups             = [aws_security_group.eh01-sg-izsub-basionhost.id]
-    subnet_id                   = aws_subnet.eh01_sub_ezweb[0].id
+  ami                         = var.ami_id
+  associate_public_ip_address = true
+  instance_type               = var.instace_type
+  key_name                    = aws_key_pair.ehkey_pair_threetier.key_name
+  security_groups             = [aws_security_group.eh01-sg-izsub-basionhost.id]
+  subnet_id                   = aws_subnet.eh01_sub_ezweb[0].id
 
-    lifecycle {
+  lifecycle {
     #prevent_destroy = true
-    ignore_changes  = [ami, user_data, subnet_id, security_groups]
-    }
+    ignore_changes = [ami, user_data, subnet_id, security_groups]
+  }
 
-    tags = {
-      Name = "Bastion Host"
-    }
+  tags = {
+    Name = "Bastion Host"
+  }
 }

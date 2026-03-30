@@ -3,16 +3,16 @@ resource "aws_security_group" "eh01-sg-iznlb" {
   name        = "eh01-sg-iznlb"
   description = "SG for internal app NLB"
   vpc_id      = aws_vpc.eh01-vpc-threetier.id
-    
-    ingress {
-        description = "Allow traffic from Web server"
-        from_port   = 8080
-        to_port     = 8080
-        protocol    = "tcp"
-        security_groups = [aws_security_group.eh01-sg-ezweb.id]
+
+  ingress {
+    description     = "Allow traffic from Web server"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eh01-sg-ezweb.id]
   }
 
-    egress {
+  egress {
     description = "Oubound traffic to App server"
     from_port   = 8080
     to_port     = 8080
@@ -34,32 +34,32 @@ resource "aws_security_group" "eh01-sg-izapp" {
   description = "SG for internal app tier"
   vpc_id      = aws_vpc.eh01-vpc-threetier.id
 
-    ingress {
-        description = "Allow inbound traffic"
-        from_port   = 8080
-        to_port     = 8080
-        protocol    = "tcp"
-        security_groups = [aws_security_group.eh01-sg-iznlb.id]
-  }  
+  ingress {
+    description     = "Allow inbound traffic"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eh01-sg-iznlb.id]
+  }
 
-    ingress {
-        description = "Allow inbound traffic"
-        from_port   = 80
-        to_port     = 80
-        protocol    = "tcp"
-        security_groups = [aws_security_group.eh01-sg-iznlb.id]
+  ingress {
+    description     = "Allow inbound traffic"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eh01-sg-iznlb.id]
   }
 
 
-    ingress {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
 
   }
 
-    egress {
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -76,11 +76,11 @@ resource "aws_security_group" "eh01-sg-izapp" {
 
 # Create apptier launch template
 resource "aws_launch_template" "App-template" {
-  name = "App-launch-template"
-  description = "App tier Launch template"
-  image_id = var.ami_id
+  name          = "App-launch-template"
+  description   = "App tier Launch template"
+  image_id      = var.ami_id
   instance_type = var.instace_type
-  key_name = aws_key_pair.ehkey_pair_threetier.key_name
+  key_name      = aws_key_pair.ehkey_pair_threetier.key_name
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ssm_profile.name
@@ -96,7 +96,7 @@ resource "aws_launch_template" "App-template" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups = [aws_security_group.eh01-sg-izapp.id]
+    security_groups             = [aws_security_group.eh01-sg-izapp.id]
   }
 
   tag_specifications {
@@ -108,18 +108,18 @@ resource "aws_launch_template" "App-template" {
 
   #######user_data = filebase64("${path.module}/app_setup.sh")##########
   user_data = base64encode(templatefile("${path.module}/app_db.sh", {
-  DB_HOST = aws_db_instance.eh01_rds_mysql.address
-}))
+    DB_HOST = aws_db_instance.eh01_rds_mysql.address
+  }))
 
 
 }
 
 # Create Apptier NLB
 resource "aws_lb" "eh01_izapp_nlb" {
-  name               = "eh01-izapp-nlb"
-  internal           = true
-  load_balancer_type = "network"
-  subnets            = [for subnet in aws_subnet.eh01_sub_izapp : subnet.id]
+  name                       = "eh01-izapp-nlb"
+  internal                   = true
+  load_balancer_type         = "network"
+  subnets                    = [for subnet in aws_subnet.eh01_sub_izapp : subnet.id]
   enable_deletion_protection = false
 
   tags = {
@@ -156,7 +156,7 @@ resource "aws_autoscaling_group" "eh01-izapp-asg" {
   health_check_type         = "ELB"
   desired_capacity          = 2
   force_delete              = false
-  target_group_arns         = [ aws_lb_target_group.iznlb-tg.arn ]  
+  target_group_arns         = [aws_lb_target_group.iznlb-tg.arn]
   vpc_zone_identifier       = [for subnet in aws_subnet.eh01_sub_izapp : subnet.id]
   launch_template {
     id      = aws_launch_template.App-template.id

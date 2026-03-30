@@ -5,7 +5,7 @@ output "lb_dns_name" {
 
 output "IP_BasionHost" {
   description = "The Basion Host IP address"
-  value = aws_instance.eh01-ec2-izmgmt-bastionhost.public_ip
+  value       = aws_instance.eh01-ec2-izmgmt-bastionhost.public_ip
 }
 
 output "rds_endpoint" {
