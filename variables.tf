@@ -6,19 +6,19 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "vpc_cidr_mgmt" {
-  type        = string
-  description = "VPC CIDR Range for Management Zone"
-  default     = "10.0.0.0/16"
-}
+#variable "vpc_cidr_mgmt" {
+#  type        = string
+#  description = "VPC CIDR Range for Management Zone"
+#  default     = "10.0.0.0/16"
+#}
 
 
 #Default Private Subnet CIDR for Management Zone
-variable "iz_mgmtsub_cidr" {
-  type        = string
-  description = "Private Subnet CIDR for Management Zone"
-  default     = "10.0.1.0/24"
-}
+#variable "iz_mgmtsub_cidr" {
+#  type        = string
+#  description = "Private Subnet CIDR for Management Zone"
+#  default     = "10.0.1.0/24"
+#}
 
 #Default Public Subnet CIDR for Web tier
 variable "ez_websub_cidr" {
