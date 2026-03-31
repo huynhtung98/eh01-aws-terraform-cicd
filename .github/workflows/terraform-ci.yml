@@ -54,30 +54,3 @@ jobs:
           name: tfplan
           path: tfplan.out
 
-  apply:
-    name: Terraform Apply (Manual)
-    needs: terraform
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://github.com/${{ github.repository }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.6.0
-
-      - name: Download Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan.out
