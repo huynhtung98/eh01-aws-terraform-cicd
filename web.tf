@@ -16,7 +16,7 @@ resource "aws_security_group" "eh01-sg-ezalb" {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.eh01-sg-ezweb.id]
+    security_groups = ["10.0.0.0/16"]
   }
 
   tags = {
@@ -42,7 +42,7 @@ resource "aws_security_group" "eh01-sg-ezweb" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = [aws_security_group.eh01-sg-iznlb.id]
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
 

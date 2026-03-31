@@ -19,7 +19,7 @@ resource "aws_security_group" "eh01-sg-iznlb" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = [aws_security_group.eh01-sg-izapp.id]
+    cidr_blocks = ["10.0.0.0/16"]
 
   }
 
