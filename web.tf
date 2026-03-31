@@ -13,9 +13,9 @@ resource "aws_security_group" "eh01-sg-ezalb" {
   }
 
   egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
     security_groups = [aws_security_group.eh01-sg-ezweb.id]
   }
 

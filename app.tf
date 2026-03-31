@@ -3,7 +3,7 @@ resource "aws_security_group" "eh01-sg-iznlb" {
   name        = "eh01-sg-iznlb"
   description = "SG for internal app NLB"
   vpc_id      = aws_vpc.eh01-vpc-threetier.id
-  
+
   # Web → NLB
   ingress {
     description     = "Allow traffic from Web server"
@@ -45,7 +45,7 @@ resource "aws_security_group" "eh01-sg-izapp" {
     security_groups = [aws_security_group.eh01-sg-iznlb.id]
   }
 
-  
+
   egress {
     from_port   = 0
     to_port     = 0
