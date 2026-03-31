@@ -1,9 +1,10 @@
-# Create App Tier NLB Security Group
+# App Tier NLB Security Group
 resource "aws_security_group" "eh01-sg-iznlb" {
   name        = "eh01-sg-iznlb"
   description = "SG for internal app NLB"
   vpc_id      = aws_vpc.eh01-vpc-threetier.id
-
+  
+  # Web → NLB
   ingress {
     description     = "Allow traffic from Web server"
     from_port       = 8080
@@ -12,12 +13,13 @@ resource "aws_security_group" "eh01-sg-iznlb" {
     security_groups = [aws_security_group.eh01-sg-ezweb.id]
   }
 
+  # NLB → App
   egress {
     description = "Oubound traffic to App server"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/24"]
+    cidr_blocks = [aws_security_group.eh01-sg-izapp.id]
 
   }
 
@@ -28,12 +30,13 @@ resource "aws_security_group" "eh01-sg-iznlb" {
 
 
 
-# Create App Tier Security Group
+# App Tier Security Group
 resource "aws_security_group" "eh01-sg-izapp" {
   name        = "eh01-sg-izapp"
   description = "SG for internal app tier"
   vpc_id      = aws_vpc.eh01-vpc-threetier.id
 
+  # NLB → App
   ingress {
     description     = "Allow inbound traffic"
     from_port       = 8080
@@ -42,23 +45,7 @@ resource "aws_security_group" "eh01-sg-izapp" {
     security_groups = [aws_security_group.eh01-sg-iznlb.id]
   }
 
-  ingress {
-    description     = "Allow inbound traffic"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eh01-sg-iznlb.id]
-  }
-
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-
-  }
-
+  
   egress {
     from_port   = 0
     to_port     = 0
@@ -72,9 +59,7 @@ resource "aws_security_group" "eh01-sg-izapp" {
 }
 
 
-
-
-# Create apptier launch template
+# Apptier launch template
 resource "aws_launch_template" "App-template" {
   name          = "App-launch-template"
   description   = "App tier Launch template"

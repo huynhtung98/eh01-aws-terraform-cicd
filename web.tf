@@ -13,10 +13,10 @@ resource "aws_security_group" "eh01-sg-ezalb" {
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    security_groups = [aws_security_group.eh01-sg-ezweb.id]
   }
 
   tags = {
@@ -31,18 +31,25 @@ resource "aws_security_group" "eh01-sg-ezweb" {
   vpc_id      = aws_vpc.eh01-vpc-threetier.id
 
   ingress {
-    description     = "HTTPs from VPC"
+    description     = "HTTPs from ALB"
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.eh01-sg-ezalb.id]
   }
 
+  egress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = [aws_security_group.eh01-sg-iznlb.id]
+  }
+
 
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "tcp"
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 

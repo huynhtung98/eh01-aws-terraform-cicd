@@ -13,7 +13,7 @@ resource "aws_security_group" "eh01-sg-db" {
     security_groups = [aws_security_group.eh01-sg-izapp.id]
   }
 
-  # Outbound open
+
   egress {
     from_port   = 0
     to_port     = 0
