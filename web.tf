@@ -39,10 +39,13 @@ resource "aws_security_group" "eh01-sg-ezweb" {
   }
 
   egress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
+    cidr_blocks = [
+      "10.0.3.0/24", # NLB subnet 1
+      "10.0.4.0/24"  # NLB subnet 2
+    ]
   }
 
 

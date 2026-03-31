@@ -1,35 +1,3 @@
-# App Tier NLB Security Group
-resource "aws_security_group" "eh01-sg-iznlb" {
-  name        = "eh01-sg-iznlb"
-  description = "SG for internal app NLB"
-  vpc_id      = aws_vpc.eh01-vpc-threetier.id
-
-  # Web → NLB
-  ingress {
-    description     = "Allow traffic from Web server"
-    from_port       = 8080
-    to_port         = 8080
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eh01-sg-ezweb.id]
-  }
-
-  # NLB → App
-  egress {
-    description = "Oubound traffic to App server"
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-
-  }
-
-  tags = {
-    Name = "eh01-sg-iznlb"
-  }
-}
-
-
-
 # App Tier Security Group
 resource "aws_security_group" "eh01-sg-izapp" {
   name        = "eh01-sg-izapp"
@@ -38,11 +6,14 @@ resource "aws_security_group" "eh01-sg-izapp" {
 
   # NLB → App
   ingress {
-    description     = "Allow inbound traffic"
-    from_port       = 8080
-    to_port         = 8080
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eh01-sg-iznlb.id]
+    description = "Allow inbound traffic from NLB subnet"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = [
+      "10.0.3.0/24", #NLB subnet 1
+      "10.0.4.0/24"  #NLB subnet 2
+    ]
   }
 
 
