@@ -50,7 +50,7 @@ resource "aws_db_instance" "eh01_rds_mysql" {
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.eh01-sg-db.id]
   publicly_accessible    = false
-  multi_az               = true
+  multi_az               = false
   skip_final_snapshot    = true
   deletion_protection    = false
 
