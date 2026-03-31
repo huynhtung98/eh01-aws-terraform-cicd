@@ -43,7 +43,7 @@ resource "aws_security_group" "eh01-sg-ezweb" {
     from_port   = 0
     to_port     = 0
     protocol    = "tcp"
-    cidr_blocks = ["00.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
