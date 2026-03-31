@@ -6,6 +6,7 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
+
 #variable "vpc_cidr_mgmt" {
 #  type        = string
 #  description = "VPC CIDR Range for Management Zone"
