@@ -40,10 +40,10 @@ resource "aws_security_group" "eh01-sg-ezweb" {
 
 
   egress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 0
+    to_port     = 0
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = ["00.0.0.0/0"]
   }
 
   tags = {
