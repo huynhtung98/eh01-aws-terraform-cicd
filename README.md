@@ -1,83 +1,135 @@
-﻿<img width="1018" height="1359" alt="image" src="https://github.com/user-attachments/assets/c188b2ae-6604-4e9d-9ff1-835addac25a4" />
+﻿## System Architecture
 
-# AWS 3-Tier Architecture Deployment with Terraform
+![AWS 3-Tier Architecture](./screenshot/System-Architecture.PNG)
 
-This project is my hands-on build of a 3-tier architecture on AWS using Terraform.
+#AWS 3‑Tier Infrastructure with Terraform & GitHub Actions (CI/CD)
 
-I created it to practise deploying a more realistic cloud environment instead of a basic single-tier setup. The infrastructure is separated into web, application, and database layers across two Availability Zones, with load balancing, auto scaling, private networking, and managed database services included.
+This project provisions a complete 3‑tier AWS infrastructure using Terraform, with a CI/CD pipeline built from three GitHub Actions workflows. The architecture is designed for high availability, multi‑AZ resilience, and Terraform state management using S3 + DynamoDB.
 
-The web tier runs Apache on EC2 instances in public subnets and is exposed through an internet-facing Application Load Balancer.  
-The application tier runs a Flask backend on EC2 instances in private subnets behind an internal Network Load Balancer.  
-The database tier uses Amazon RDS MySQL in private subnets with Multi-AZ enabled.
+1. Project Purpose
+The goal of this project is to demonstrate how I design and operate cloud infrastructure in a way that is:
+- Highly available and fault‑tolerant
+- Modular and easy to maintain
+- Secure by default
+- Automated through CI/CD
+- Backed by a reliable remote backend (S3 + DynamoDB)
+This reflects the type of work I aim to do in CloudOps, SRE, and Platform Engineering roles.
 
-I also configured the supporting AWS components needed to make the environment work properly, including the VPC, public and private subnets, route tables, Internet Gateway, NAT Gateway, security groups, IAM roles, VPC endpoints, and a bastion host for administration.
+2. Architecture Overview
+The system follows a standard 3‑tier architecture with a strong focus on reliability and clear separation of concerns.
+High Availability & Multi‑AZ
+- All subnets, load balancers, and Auto Scaling Groups run across multiple Availability Zones
+- Traffic is distributed across AZs
+- Unhealthy instances are replaced automatically
+- No single‑AZ dependency
+This mirrors how production workloads are typically deployed on AWS.
 
-This project helped me practise not just Terraform itself, but also how a 3-tier design is actually structured in AWS — how traffic flows between layers, how private resources are protected, and how different services connect in a way that is closer to a real deployment.
+Network Layer
+- VPC with public and private subnets
+- Internet Gateway + NAT Gateway
+- Route tables per subnet group
+- Multi‑AZ subnet design
+Load Balancing Layer
+- Application Load Balancer (ALB) for the Web tier
+- Network Load Balancer (NLB) for the App tier
+- Independent health checks for each tier
+Compute Layer
+- Auto Scaling Groups for Web and App
+- EC2 instances bootstrapped via user‑data
+- Multi‑AZ deployment for resilience
+Security
+- Strict Security Group segmentation
+- Tier‑to‑tier traffic only
+- Minimal outbound rules
+- No broad or open access
 
----
+3. Terraform State Management (S3 + DynamoDB)
+The project uses a remote backend to ensure safe, consistent, and collaborative Terraform operations.
+S3 Bucket
+- Stores the Terraform state file
+- Versioning enabled
+- Server‑side encryption
+DynamoDB Table
+- Provides state locking
+- Prevents concurrent terraform apply
+- Eliminates race conditions in CI/CD
+This setup is aligned with real‑world production environments.
 
-## Architecture Overview
+4. Technologies Used
+|  |  | 
+|  |  | 
+|  |  | 
+|  |  | 
+|  |  | 
+|  |  | 
+|  |  | 
 
-The infrastructure is split into three layers:
 
-### Web Tier
-- EC2 instances running Apache
-- Deployed in public subnets
-- Fronted by an internet-facing Application Load Balancer
-- Managed by an Auto Scaling Group
+5. Repository Structure
+/modules
+   /vpc
+   /alb
+   /nlb
+   /web
+   /app
+   /asg
+   /sg
 
-### Application Tier
-- EC2 instances running a Flask application
-- Deployed in private subnets
-- Fronted by an internal Network Load Balancer
-- Accessed only from the web tier
+/environments
+   /dev
+   /prod
 
-### Database Tier
-- Amazon RDS MySQL
-- Deployed in private subnets
-- Configured with Multi-AZ for better availability
-- Accessible only from the application tier
+/.github/workflows
+   terraform-ci.yml
+   terraform-apply.yml
+   terraform-destroy.yml
 
----
+README.md
 
-## Supporting Components
+6. CI/CD Pipeline (3 Workflow Files)
+The project uses three separate GitHub Actions workflows, each with a clear responsibility.
+6.1 terraform-ci.yml
+Runs automatically on every push or pull request.
+- terraform fmt
+- terraform validate
+- terraform init
+- terraform plan
+Ensures every change is tested and validated before deployment.
+6.2 terraform-apply.yml
+Triggered manually when deploying changes.
+- terraform apply
+- Uses the remote backend (S3 + DynamoDB)
+- Ensures controlled, predictable, and auditable deployments
+6.3 terraform-destroy.yml
+Manual workflow for tearing down environments.
+- terraform destroy
+- Useful for cleanup or temporary environments
 
-- Custom VPC across two Availability Zones
-- Public and private subnets
-- Internet Gateway and NAT Gateway
-- Route tables and route associations
-- Security groups between tiers
-- IAM roles and instance profiles
-- VPC endpoints for SSM and S3
-- Bastion host for administrative access
+7. Deployment Guide
+Clone the repository
+git clone https://github.com/huynhtung98/eh01-aws-terraform-cicd
 
----
+Navigate to an environment
+cd environments/dev
 
-## Terraform Structure
+Deploy
+terraform init
+terraform apply
 
-The Terraform configuration is organised by component:
+8. Key Learnings
+Through this project, I strengthened my skills in:
+- Designing high‑availability, multi‑AZ AWS architectures
+- Structuring Terraform modules for clarity and reusability
+- Implementing CI/CD pipelines for IaC
+- Managing Terraform state with S3 + DynamoDB
+- Debugging module dependencies and variable wiring
+- Applying CloudOps/SRE principles in real infrastructure
 
-- `provider.tf` – provider configuration
-- `vpc1.tf` – VPC, subnets, routing, gateways, and networking
-- `web.tf` – web tier resources
-- `app.tf` – application tier resources
-- `db.tf` – database tier resources
-- `vpc_endpoints.tf` – VPC endpoints
-- `iam.tf` – IAM roles and policies
-- `keypair.tf` – key pair configuration
-- `output.tf` – Terraform outputs
-
----
-
-## What I Practised in This Project
-
-Through this project, I got hands-on experience with:
-
-- Building a multi-tier AWS environment using Terraform
-- Designing public and private subnet separation
-- Configuring ALB, NLB, and Auto Scaling Groups
-- Deploying a Flask app behind internal load balancing
-- Setting up RDS MySQL in private subnets
-- Controlling traffic flow between tiers with security groups
-- Using VPC endpoints and IAM roles to reduce direct public access
-- Structuring Terraform files for a clearer deployment layout
+9. Why This Project Matters
+This project reflects how I approach CloudOps/SRE work:
+- Infrastructure is highly available, fault‑tolerant, and multi‑AZ
+- Terraform is modular, predictable, and easy to maintain
+- CI/CD ensures safe and repeatable deployments
+- Remote backend ensures state consistency and team collaboration
+- Security is built into every layer
+- Architecture follows production‑grade patterns
