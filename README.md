@@ -3,9 +3,9 @@
 ![AWS 3-Tier Architecture](./screenshot/System-Architecture.PNG)
 
 AWS 3‑Tier Infrastructure with Terraform & GitHub Actions (CI/CD)
-This project builds a simple, production‑style 3‑tier architecture on AWS using Terraform.
+This project builds a simple 3‑tier architecture on AWS using Terraform.
 Everything is modular, multi‑AZ, and deployed through a lightweight CI/CD pipeline using GitHub Actions.
-The goal is to show how I design and operate cloud infrastructure in a clean, reliable, and maintainable way — the same approach I use in CloudOps/SRE work.
+The goal is to show how I design and operate cloud infrastructure in a clean, reliable, and maintainable.
 
 1. Architecture Overview
 The system follows a standard 3‑tier layout with clear separation between network, compute, and load balancing layers.
