@@ -22,13 +22,14 @@ resource "aws_subnet" "eh01_sub_ezweb" {
 
 # Allocate Elastic IP for NAT Gateway
 resource "aws_eip" "eh01_nat_eip" {
+  domain = "vpc"
 
   tags = {
     Name = "eh01-nat-eip"
   }
 }
 
-# Create NAT Gateway in internet web wubnet
+# Create NAT Gateway in public web subnet
 resource "aws_nat_gateway" "eh01_natgw_ezweb" {
   allocation_id = aws_eip.eh01_nat_eip.id
   subnet_id     = aws_subnet.eh01_sub_ezweb[0].id

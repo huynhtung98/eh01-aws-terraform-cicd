@@ -10,8 +10,10 @@ resource "aws_launch_template" "Ezweb-launch-template" {
     name = var.instance_profile
   }
 
+  # Require IMDSv2
   metadata_options {
     http_endpoint = "enabled"
+    http_tokens   = "required"
   }
 
   monitoring {
@@ -19,6 +21,8 @@ resource "aws_launch_template" "Ezweb-launch-template" {
   }
 
   network_interfaces {
+    # Web tier lives in public subnets and needs a public IP for outbound
+    # internet access (package installs) since those subnets route via IGW.
     associate_public_ip_address = true
     security_groups             = [var.sg_id]
   }
@@ -26,17 +30,14 @@ resource "aws_launch_template" "Ezweb-launch-template" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "Web tier Launch template"
+      Name = "eh01-ec2-ezweb"
     }
   }
 
- # user_data = base64encode(templatefile("${path.module}/user_data.sh", {
- #   NLB_DNS = var.nlb_dns
- #   })
- # )
+  user_data = base64encode(templatefile("${path.module}/user-data.sh", {
+    NLB_DNS = var.nlb_dns
+  }))
 }
-
-
 
 # Create Webtier autoscaling group
 resource "aws_autoscaling_group" "eh01-ezweb-asg" {
@@ -49,17 +50,19 @@ resource "aws_autoscaling_group" "eh01-ezweb-asg" {
   force_delete              = false
   target_group_arns         = [var.target_group_arn]
   vpc_zone_identifier       = var.subnets
+
   launch_template {
     id      = aws_launch_template.Ezweb-launch-template.id
     version = "$Latest"
   }
+
   lifecycle {
     create_before_destroy = true
   }
+
   tag {
     key                 = "Name"
     value               = "eh01-ec2-ezweb-asg"
     propagate_at_launch = true
   }
-
 }

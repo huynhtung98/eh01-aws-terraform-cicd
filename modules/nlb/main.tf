@@ -17,6 +17,13 @@ resource "aws_lb_target_group" "iznlb-tg" {
   port     = 8080
   protocol = "TCP"
   vpc_id   = var.vpc_id
+
+  health_check {
+    protocol            = "TCP"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    interval            = 15
+  }
 }
 
 # Create Apptier NLB listener

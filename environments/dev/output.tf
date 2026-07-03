@@ -17,3 +17,7 @@ output "web_asg_name" {
 output "app_asg_name" {
   value = module.asg_app.app_asg_name
 }
+
+output "db_endpoint" {
+  value = module.rds.db_endpoint
+}
