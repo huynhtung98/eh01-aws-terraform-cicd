@@ -10,8 +10,10 @@ resource "aws_launch_template" "App-template" {
     name = var.instance_profile
   }
 
+  # Require IMDSv2
   metadata_options {
     http_endpoint = "enabled"
+    http_tokens   = "required"
   }
 
   monitoring {
@@ -19,26 +21,25 @@ resource "aws_launch_template" "App-template" {
   }
 
   network_interfaces {
-    associate_public_ip_address = true
+    # App tier is in private subnets; outbound traffic goes through the NAT GW
+    associate_public_ip_address = false
     security_groups             = [var.sg_id]
   }
 
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "App tier Launch template"
+      Name = "eh01-ec2-izapp"
     }
   }
 
-  #######user_data = filebase64("${path.module}/app_setup.sh")##########
   user_data = base64encode(templatefile("${path.module}/app_db.sh", {
-    DB_HOST = var.db_host
+    DB_HOST     = var.db_host
+    DB_NAME     = var.db_name
+    DB_USERNAME = var.db_username
+    DB_PASSWORD = var.db_password
   }))
-
-
 }
-
-
 
 # Create Apptier autoscaling group
 resource "aws_autoscaling_group" "eh01-izapp-asg" {
@@ -51,17 +52,19 @@ resource "aws_autoscaling_group" "eh01-izapp-asg" {
   force_delete              = false
   target_group_arns         = [var.target_group_arn]
   vpc_zone_identifier       = var.subnets
+
   launch_template {
     id      = aws_launch_template.App-template.id
     version = "$Latest"
   }
+
   lifecycle {
     create_before_destroy = true
   }
+
   tag {
     key                 = "Name"
     value               = "eh01-ec2-izapp-asg"
     propagate_at_launch = true
   }
-
 }

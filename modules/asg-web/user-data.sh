@@ -1,43 +1,34 @@
 #!/bin/bash
-
 set -e
-#Update all package repositories
+
+# Update all package repositories
 sudo dnf update -y
-sudo dnf install net-tools -y
+sudo dnf install -y net-tools httpd
 
-cd /tmp
-sudo dnf install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-
-cd /home/ec2-user
-#Install Apache web server
-sudo dnf install -y httpd
-
-#Start and Enable Apache web server
-
+# Enable Apache web server
 sudo systemctl enable httpd
 
-# Start and enable SSM agent
-sudo systemctl enable amazon-ssm-agent
-sudo systemctl start amazon-ssm-agent
+# SSM agent is preinstalled on Amazon Linux 2023; make sure it is running
+sudo systemctl enable --now amazon-ssm-agent
 
-#Retrive EC2 instance public ipv4 metadata
-publicipv4=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
-&& curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/public-ipv4)
+# Retrieve EC2 instance metadata (IMDSv2)
+TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+PUBLIC_IPV4=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4)
+HOST_NAME=$(hostname)
 
 # Create basic index.html page
-sudo bash -c 'cat <<EOF > /var/www/html/index.html
+sudo bash -c "cat > /var/www/html/index.html" <<EOF
 <html>
   <head><title>Web Server</title></head>
   <body>
-    <h1>Hello from Web Server: $(hostname)</h1>
-    <p>Public IP: $(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)</p>
+    <h1>Hello from Web Server: $HOST_NAME</h1>
+    <p>Public IP: $PUBLIC_IPV4</p>
   </body>
 </html>
-EOF'
-
+EOF
 
 # Add Reverse Proxy configuration to Apache
-sudo tee -a /etc/httpd/conf/httpd.conf > /dev/null <<'EOF'
+sudo tee -a /etc/httpd/conf/httpd.conf > /dev/null <<EOF
 
 ProxyRequests Off
 ProxyPreserveHost On
@@ -50,12 +41,10 @@ ProxyPass /app http://${NLB_DNS}:8080/
 ProxyPassReverse /app http://${NLB_DNS}:8080/
 EOF
 
-# Restart Apache to apply new configuration
-
-
-
-echo "✅ Apache setup complete. Web + Reverse Proxy active."
-
+# Allow Apache to make outbound network connections (SELinux)
 sudo setsebool -P httpd_can_network_connect 1
 
+# Restart Apache to apply new configuration
 sudo systemctl restart httpd
+
+echo "Apache setup complete. Web + Reverse Proxy active."

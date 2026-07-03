@@ -16,17 +16,11 @@ resource "aws_iam_role" "ssm_role" {
   })
 }
 
-# Attach Managed Policies
-# AmazonSSMFullAccess
-resource "aws_iam_role_policy_attachment" "ssm_full_access" {
+# Least privilege: only what the SSM agent needs (Session Manager, inventory).
+# AmazonSSMFullAccess would let instances administer SSM itself.
+resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
   role       = aws_iam_role.ssm_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-}
-
-# AmazonEC2RoleforSSM
-resource "aws_iam_role_policy_attachment" "ec2_role_for_ssm" {
-  role       = aws_iam_role.ssm_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 # Create Instance Profile for EC2
